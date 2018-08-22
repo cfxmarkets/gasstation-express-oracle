@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+db_input low eth-gasexpress/svc-user || true
+db_go || true
+

@@ -1,0 +1,13 @@
+[Unit]
+Description=Ethereum gas oracle service
+After=mainnet-node rinkeby-node
+
+[Service]
+Type=simple
+Environment=PYTHONPATH=/srv/local/eth-gasexpress/vendor
+User=%i
+Restart=on-failure
+ExecStart=/usr/bin/python3 /srv/local/eth-gasexpress/gasExpress.py
+
+[Install]
+WantedBy=multi-user.target

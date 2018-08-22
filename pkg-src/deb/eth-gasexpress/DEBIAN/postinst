@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+db_get eth-gasexpress/svc-user
+SVCUSER="$RET"
+
+ACTION="$1"
+if [ "$DEBCONF_RECONFIGURE" == '1' ]; then
+    ACTION="reconfigure"
+fi
+
+# Run every install
+if [ "$ACTION" != 'triggered' ]; then
+    # Create service user/group
+    if ! grep -q "^$SVCUSER:" /etc/passwd; then
+        if ! grep -q "^$SVCUSER:" /etc/group; then
+            groupadd "$SVCUSER"
+        fi
+        useradd -g "$SVCUSER" -M -r "$SVCUSER"
+    fi
+
+    # Own the service directory
+    chown -R "$SVCUSER:$SVCUSER" /srv/local/eth-gasexpress
+
+    # Setguid for all directories in service directory
+    find /srv/local/eth-gasexpress -type d -exec chmod g+s "{}" \;
+
+    # Make sure python dependencies are up to date
+    pip3 install -t /srv/local/eth-gasexpress/vendor -r /srv/local/eth-gasexpress/requirements.txt || true
+
+    # Enable the service on fresh installs
+    if dpkg --compare-versions "$2" lt "1.0.0"; then
+        systemctl enable --now eth-gasexpress.service
+    fi
+fi
+
