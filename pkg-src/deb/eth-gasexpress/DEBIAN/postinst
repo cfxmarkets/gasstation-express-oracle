@@ -7,6 +7,12 @@ set -e
 db_get eth-gasexpress/svc-user
 SVCUSER="$RET"
 
+db_get eth-gasexpress/rpc-host
+host="$RET"
+
+db_get eth-gasexpress/rpc-port
+port="$RET"
+
 ACTION="$1"
 if [ "$DEBCONF_RECONFIGURE" == '1' ]; then
     ACTION="reconfigure"
@@ -30,6 +36,13 @@ if [ "$ACTION" != 'triggered' ]; then
 
     # Make sure python dependencies are up to date
     pip3 install -t /srv/local/eth-gasexpress/vendor -r /srv/local/eth-gasexpress/requirements.txt || true
+
+    # Populate the service template and place
+    cat /usr/share/eth-gasexpress/eth-gasexpress.service.template | 
+      sed "s/%host%/$host/" |
+      sed "s/%port%/$port/" | 
+      sed "s/%user%/$SVCUSER/" \
+      > /lib/systemd/system/eth-gasexpress.service
 
     # Enable the service on fresh installs
     if dpkg --compare-versions "$2" lt "1.0.0"; then

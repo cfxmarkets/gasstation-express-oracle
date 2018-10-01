@@ -3,3 +3,13 @@ Type: string
 Default: eth-gasexpress
 Description: Please set the username of the owner of this service:
  This is the user that the service will run as.
+
+Template: eth-gasexpress/rpc-host
+Type: string
+Default: localhost
+Description: Please set the host where the Web3 RPC runs.
+
+Template: eth-gasexpress/rpc-port
+Type: string
+Default: 8545
+Description: Please set the port of the Web3 RPC.

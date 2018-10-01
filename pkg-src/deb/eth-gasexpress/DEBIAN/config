@@ -5,5 +5,8 @@ set -e
 . /usr/share/debconf/confmodule
 
 db_input low eth-gasexpress/svc-user || true
+db_input high eth-gasexpress/rpc-host || true
+db_input high eth-gasexpress/rpc-port || true
 db_go || true
+
 
