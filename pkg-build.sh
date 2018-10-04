@@ -6,6 +6,7 @@ set -e
 
 function setup_env() {
     setup_deb_env
+    builddir="pkg-build"
 }
 
 function place_files() {

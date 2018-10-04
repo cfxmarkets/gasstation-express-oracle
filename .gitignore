@@ -1,7 +1,8 @@
 vendor
 __pycache__
 bin/
-build/
+build
+pkg-build
 *.json
 *.spec
 lib
