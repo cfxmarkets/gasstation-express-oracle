@@ -44,6 +44,14 @@ if [ "$ACTION" != 'triggered' ]; then
       sed "s/%user%/$SVCUSER/" \
       > /lib/systemd/system/eth-gasexpress.service
 
+    # Configure CSF to open a port if necessary
+    if [ ! "$host" == "localhost" ]; then
+      n=$(csf-config open-ports TCP_OUT "$port")
+       if [[ $n -gt 0 ]]; then
+         csf -ra
+       fi
+    fi
+
     # Enable the service on fresh installs
     if dpkg --compare-versions "$2" lt "1.0.0"; then
         systemctl enable --now eth-gasexpress.service
