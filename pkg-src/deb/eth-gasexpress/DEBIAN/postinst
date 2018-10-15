@@ -4,6 +4,36 @@ set -e
 
 . /usr/share/debconf/confmodule
 
+function set_up_csf() {
+  local reload_csf="false"
+  local p k
+
+  if [ ! -e /etc/csf/csf.conf ]; then
+    >&2 echo "I: csf not installed. Not opening ports for gasstation-express-oracle."
+    return
+  fi
+
+  # Ports
+  if [ ! "$host" == "localhost" ]; then
+    n=$(csf-config open-ports TCP_OUT "$port")
+    if [[ $n -gt 0 ]]; then
+      reload_csf="true"
+    fi
+  fi
+
+  # Process ignores
+  local pignores="$pignores""cmd:/usr/bin/python3 /srv/local/eth-gasexpress/gasExpress.py"$'\x1e'
+  if ! n=$(csf-ignore "$pignores"); then
+    >&2 echo "E: Couldn't add gasstation-express-oracle ignores to csf pignore file"
+  elif [ "$(echo "$n" | wc -l)" -gt 0 ]; then
+    reload_csf="true"
+  fi
+
+  if [ "$reload_csf" == "true" ]; then
+    dpkg-trigger --no-await csf-reload
+  fi
+}
+
 db_get eth-gasexpress/svc-user
 SVCUSER="$RET"
 
@@ -44,13 +74,7 @@ if [ "$ACTION" != 'triggered' ]; then
       sed "s/%user%/$SVCUSER/" \
       > /lib/systemd/system/eth-gasexpress.service
 
-    # Configure CSF to open a port if necessary
-    if [ ! "$host" == "localhost" ]; then
-      n=$(csf-config open-ports TCP_OUT "$port")
-       if [[ $n -gt 0 ]]; then
-         csf -ra
-       fi
-    fi
+    set_up_csf
 
     # Enable the service on fresh installs
     if dpkg --compare-versions "$2" lt "1.0.0"; then
@@ -58,3 +82,13 @@ if [ "$ACTION" != 'triggered' ]; then
     fi
 fi
 
+
+
+
+
+# Triggers
+if [ "$ACTION" == "triggered" ]; then
+  if [ "$2" == "csf-hardening-changed" ]; then
+    set_up_csf
+  fi
+fi
