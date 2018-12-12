@@ -74,11 +74,13 @@ if [ "$ACTION" != 'triggered' ]; then
       sed "s/%user%/$SVCUSER/" \
       > /lib/systemd/system/eth-gasexpress.service
 
+    systemctl daemon-reload || true
+
     set_up_csf
 
     # Enable the service on fresh installs
     if dpkg --compare-versions "$2" lt "1.0.0"; then
-        systemctl enable --now eth-gasexpress.service
+        systemctl enable --now eth-gasexpress.service || true
     fi
 fi
 

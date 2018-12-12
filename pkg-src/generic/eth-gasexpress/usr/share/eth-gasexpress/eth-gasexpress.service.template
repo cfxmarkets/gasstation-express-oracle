@@ -1,11 +1,12 @@
 [Unit]
-Description=Ethereum gas oracle service
+Description=Ethereum gas oracle service (restarted every 4 hours to combat memory leak)
 
 [Service]
 Type=simple
 WorkingDirectory=/srv/local/eth-gasexpress
 Environment="PYTHONPATH=/srv/local/eth-gasexpress/vendor" "GASSTATION_RPC=%host%:%port%"
 User=%user%
+WatchdogSec=14400
 Restart=on-failure
 ExecStart=/usr/bin/python3 /srv/local/eth-gasexpress/gasExpress.py
 
