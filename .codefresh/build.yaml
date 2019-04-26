@@ -1,0 +1,32 @@
+version: '1.0'
+
+stages:
+- setup
+- build
+- push
+
+steps:
+  main_clone:
+    title: Clone source
+    type: git-clone
+    stage: setup
+    repo: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
+    revision: "${{CF_REVISION}}"
+    git: github-token
+
+  build_image:
+    title: Build Docker image
+    type: build
+    stage: build
+    image_name: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
+    tag: "${{CF_BRANCH}}"
+
+  push_image:
+    title: Push Docker image to ECR
+    type: push 
+    stage: push
+    candidate: "${{build_image}}"
+    tag: "${{CF_BRANCH}}"
+    image_name: gasstation-express-oracle
+    registry: openfinance-ecr-us-west-2
+
